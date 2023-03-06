@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Sep 17 15:00:05 2022
+Created on Mon Mar  6 11:39:26 2023
 
 @author: ZR48SA
 """
+
+
 #%% set base path
 from pathlib import Path
 import os
@@ -123,140 +125,167 @@ def MSFragger_annotation(input_files,   #full_path, .mzML
     com.output_files=pepxml_files
     return com
 
-def DecoyDatabase(database):
+
+def MSGFPlusAdapter(file,database_path,msgf_path,output_folder="Spectrum_annotation",args=""):
+    output_file=str(Path(Output_directory,output_folder,Path(file).stem+".idXML"))
+    if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
+    command=base_command+"MSGFPlusAdapter -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'+" -executable "+'"'+msgf_path+'"'+" -database "+'"'+database_path+'"'
+    command+=args #additional arguments
+    print(command)
+    stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    return output_file
+
+def DecoyDatabase(database,args=""):
     output_file=str(Path(basedir,Path(database).stem+"_decoy.fa"))
     command=base_command+"DecoyDatabase -in "+'"'+database+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file    
     
-def FeatureFinderMultiplex(file,output_folder="Features"):
+def FeatureFinderMultiplex(file,output_folder="Features",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).stem+".featureXML"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"FeatureFinderMultiplex -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def FeatureFinderMultiplex(file,output_folder="Features"):
+def FeatureFinderMultiplex(file,output_folder="Features",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).stem+".featureXML"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"FeatureFinderMultiplex -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def HighResPrecursorMassCorrector(file,feature_file,output_folder="Corrected_mzML"):
+def HighResPrecursorMassCorrector(file,feature_file,output_folder="Corrected_mzML",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"HighResPrecursorMassCorrector -in "+'"'+file+'"'+" -feature:in "+'"'+feature_file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def idconvert(file,output_folder="Spectrum_annotation"): #proteowizard
+def idconvert(file,output_folder="Spectrum_annotation",args=""): #proteowizard
     output_file=str(Path(Output_directory,output_folder,Path(file).stem+".mzID"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"idconvert "+'"'+file+'"'+" -o "+'"'+output_folder+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def IDFileConverter(file,output_folder="Spectrum_annotation"): #proteowizard
+def IDFileConverter(file,output_folder="Spectrum_annotation",args=""): 
     output_file=str(Path(Output_directory,output_folder,Path(file).stem+".idXML"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"IDFileConverter -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def PeptideIndexer(file,database,output_folder="Spectrum_annotation"):
+def PeptideIndexer(file,database,output_folder="Spectrum_annotation",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"PeptideIndexer -in "+'"'+file+'"'+" -fasta "+'"'+database+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def Proteininference(file,output_folder="Spectrum_annotation"):
+def Proteininference(file,output_folder="Spectrum_annotation",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"Proteininference -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def FalseDiscoveryRate(file,output_folder="Spectrum_annotation"):
+def FalseDiscoveryRate(file,output_folder="Spectrum_annotation",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"FalseDiscoveryRate -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def IDFilter(file,output_folder="Spectrum_annotation"):
+def IDFilter(file,output_folder="Spectrum_annotation",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"IDFilter -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def InternalCalibration(mzML_file,idXML_file,output_folder="Corrected_mzML"):
+def InternalCalibration(mzML_file,idXML_file,output_folder="Corrected_mzML",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(mzML_file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"InternalCalibration -in "+'"'+mzML_file+'"'+" -cal:id_in  "+'"'+idXML_file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def MapAlignerIdentification(files,output_folder="Alignment"):
+def MapAlignerIdentification(files,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     in_files=" ".join(['"'+file+'"' for file in files])
     output_files=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).name))+'"' for file in files])
     trafo_outfiles=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).stem))+".trafoXML"+'"' for file in files])
     command=base_command+"MapAlignerIdentification -in "+in_files+" -trafo_out "+trafo_outfiles+" -out "+output_files
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_files.split(),trafo_outfiles.split()
 
-def MapRTTransformer(file,trafofile,output_folder="Alignment"):
+def MapRTTransformer(file,trafofile,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     command=base_command+"MapRTTransformer -in "+'"'+file+'"'+" -trafo_in  "+trafofile+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
     
-def IDMapper(aligned_idXML_file,aligned_feature,output_folder="Alignment"):
+def IDMapper(aligned_idXML_file,aligned_feature,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     output_file=str(Path(Output_directory,output_folder,Path(aligned_feature).name))
     command=base_command+"IDMapper -in "+'"'+aligned_feature+'"'+" -id  "+'"'+aligned_idXML_file+'"'+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def FeatureLinkerUnlabeledQT(files,output_folder="Alignment"):
+def FeatureLinkerUnlabeledQT(files,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     in_files=" ".join(['"'+file+'"' for file in files])
     output_file=str(Path(Output_directory,output_folder,"features.consensusXML")) 
     command=base_command+"FeatureLinkerUnlabeledQT -in "+in_files+"  -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def IDConflictResolver(file,output_folder="Alignment"):
+def IDConflictResolver(file,output_folder="Alignment",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"IDConflictResolver -in "+file+" -out "+output_file
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
 
-def FileConverter(file,output_folder="Alignment"):
+def FileConverter(file,output_folder="Alignment",args=""):
     output_file=str(Path(Output_directory,output_folder,"Pooled.featureXML"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     command=base_command+"FileConverter -in "+file+" -out "+'"'+output_file+'"'
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return output_file
@@ -265,7 +294,7 @@ def FileConverter(file,output_folder="Alignment"):
 def MetaProSIP(file,
                database,
                pooled_features,
-               output_folder="MetaproSIP_results"):
+               output_folder="MetaproSIP_results",args=""):
     
     
     out_csv=str(Path(Output_directory,output_folder,Path(file).stem+".csv"))
@@ -280,7 +309,7 @@ def MetaProSIP(file,
                                   " -out_peptide_centric_csv "+'"'+out_peptide_centric_csv+'"'])
     
     
-
+    command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     return out_csv, out_peptide_centric_csv
@@ -289,17 +318,24 @@ def MetaProSIP(file,
 #%%
 
 #input variables
-mzml_files=["C:/MultiNovo/HB_mzML/T1_2_HK_JLN_UPLIFT.mzML",
-"C:/MultiNovo/HB_mzML/T0_1_HK_JLN_UPLIFT.mzML",
-"C:/MultiNovo/HB_mzML/T0_2_HK_JLN_UPLIFT.mzML",
-"C:/MultiNovo/HB_mzML/T1_1_HK_JLN_UPLIFT.mzML"]
+mzml_files=["C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_10_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_1_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_1_2000ng_control.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_5_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_10_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_1_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_5_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_10_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_1_2000ng.mzML",
+"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_5_2000ng.mzML"]
+mzml_files.sort() #does the order of files matter?
 
-database="C:/MultiNovo/Paola 2 UniprotKB/HB_cycle_5/New_MSFragger_db_unique.fa"
+database="C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/Database/target_decoy.fa"
 
 #Also requires R to be set up and MSFragger to be installed
 
 #add decoy to database
-database=DecoyDatabase(database)
+#database=DecoyDatabase(database)
 
 
 #Loop 1: correct Feature mz to detected features or MS1 trace peaks
@@ -308,12 +344,16 @@ feature_files  =[FeatureFinderMultiplex(file)                          for    fi
 corrected_mzMLs=[HighResPrecursorMassCorrector(file,feature_files[ix]) for ix,file in enumerate( mzml_files)]    
 
 #Loop 2: Peptide annotation
-#input: loop 1 output
-MSFragger_files=MSFragger_annotation(corrected_mzMLs, # MSGFPlusAdapter (replace with MSFragger)
-                                     database).output_files
+#MSFragger
+# MSFragger_files=MSFragger_annotation(corrected_mzMLs, # MSGFPlusAdapter (replace with MSFragger)
+#                                      database).output_files
+# mzID_files=[idconvert(file) for file in MSFragger_files]
+# idXML_files=[IDFileConverter(file) for file in mzID_files]
 
-mzID_files=[idconvert(file) for file in MSFragger_files]
-idXML_files=[IDFileConverter(file) for file in mzID_files]
+#MSGF
+msgf_path="C:/MSGF/MSGFPlus_v20230112/MSGFPlus.jar"
+idXML_files=[MSGFPlusAdapter(file,database_path=database,msgf_path=msgf_path) for file in corrected_mzMLs]    
+
 Annotated_spectra=[IDFilter(FalseDiscoveryRate(Proteininference(PeptideIndexer(file,database)))) for file in idXML_files]
 
 #Loop3: Internal Calibration
@@ -338,4 +378,3 @@ pooled_features=FileConverter(consensus_file)
 #Loop 5. MetaproSIP
 #annotate aligned features with aligned idXML
 result=[MetaProSIP(file,database,pooled_features) for file in aligned_mzMLs]
-
