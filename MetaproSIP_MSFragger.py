@@ -125,6 +125,19 @@ def MSFragger_annotation(input_files,   #full_path, .mzML
     com.output_files=pepxml_files
     return com
 
+def raw2mzML(raw_file): #
+
+    output_folder=str(Path(Output_directory,"HB_mzML"))
+    if not os.path.exists(output_folder): os.mkdir(output_folder)
+
+    command="cd" +' "'+output_folder+'" && msconvert '
+    command+='"'+raw_file+'"' 
+    command+=' --mzML --filter "peakPicking vendor" --filter "zeroSamples removeExtra" --filter "titleMaker Run: <RunId>, Index: <Index>, Scan: <ScanNumber>"'
+    print(command)
+    stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    
+    output_file=str(Path(output_folder,Path(raw_file).stem+".mzML"))
+    return output_file
 
 def MSGFPlusAdapter(file,database_path,msgf_path,output_folder="Spectrum_annotation",args=""):
     output_file=str(Path(Output_directory,output_folder,Path(file).stem+".idXML"))
@@ -235,19 +248,24 @@ def InternalCalibration(mzML_file,idXML_file,output_folder="Corrected_mzML",args
 
 def MapAlignerIdentification(files,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
-    in_files=" ".join(['"'+file+'"' for file in files])
-    output_files=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).name))+'"' for file in files])
-    trafo_outfiles=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).stem))+".trafoXML"+'"' for file in files])
-    command=base_command+"MapAlignerIdentification -in "+in_files+" -trafo_out "+trafo_outfiles+" -out "+output_files
+    in_files=" ".join(['"'+str(Path(file))+'"' for file in files])
+    
+    output_files=  [str(Path(Output_directory,output_folder,Path(file).name))             for file in files]
+    trafo_outfiles=[str(Path(Output_directory,output_folder,Path(file).stem+".trafoXML")) for file in files]
+    
+    # output_files=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).name))+'"' for file in files])
+    # trafo_outfiles=" ".join(['"'+str(Path(Output_directory,output_folder,Path(file).stem))+".trafoXML"+'"' for file in files])
+    command=base_command+"MapAlignerIdentification -in "+in_files+" -trafo_out "+'"'+'" "'.join(trafo_outfiles)+'"'+" -out "+'"'+'" "'.join(output_files)+'"'
     command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    return output_files.split(),trafo_outfiles.split()
+    #return output_files.split('" "'),trafo_outfiles.split('" "')
+    return output_files,trafo_outfiles
 
 def MapRTTransformer(file,trafofile,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
     output_file=str(Path(Output_directory,output_folder,Path(file).name))
-    command=base_command+"MapRTTransformer -in "+'"'+file+'"'+" -trafo_in  "+trafofile+" -out "+'"'+output_file+'"'
+    command=base_command+"MapRTTransformer -in "+'"'+file+'"'+" -trafo_in  "+'"'+trafofile+'"'+" -out "+'"'+output_file+'"'
     command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -264,7 +282,7 @@ def IDMapper(aligned_idXML_file,aligned_feature,output_folder="Alignment",args="
 
 def FeatureLinkerUnlabeledQT(files,output_folder="Alignment",args=""):
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
-    in_files=" ".join(['"'+file+'"' for file in files])
+    in_files=" ".join(['"'+str(Path(file))+'"' for file in files])
     output_file=str(Path(Output_directory,output_folder,"features.consensusXML")) 
     command=base_command+"FeatureLinkerUnlabeledQT -in "+in_files+"  -out "+'"'+output_file+'"'
     command+=args #additional arguments
@@ -284,7 +302,7 @@ def IDConflictResolver(file,output_folder="Alignment",args=""):
 def FileConverter(file,output_folder="Alignment",args=""):
     output_file=str(Path(Output_directory,output_folder,"Pooled.featureXML"))
     if not os.path.exists(str(Path(Output_directory,output_folder))): os.mkdir(str(Path(Output_directory,output_folder)))
-    command=base_command+"FileConverter -in "+file+" -out "+'"'+output_file+'"'
+    command=base_command+"FileConverter -in "+'"'+file+'"'+" -out "+'"'+output_file+'"'
     command+=args #additional arguments
     print(command)
     stdout, stderr =subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -318,19 +336,19 @@ def MetaProSIP(file,
 #%%
 
 #input variables
-mzml_files=["C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_10_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_1_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_1_2000ng_control.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_5_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR1_10_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_1_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_5_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR2_10_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_1_2000ng.mzML",
-"C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/mzML/Run1_MockU2_EcoliR3_5_2000ng.mzML"]
+mzml_files=[
+#"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_0_13C_400ng.mzML", this file had a parsing error
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_0-01_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_0-1_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_0-025_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_0-25_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_1_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_5_13C_400ng.mzML",
+"C:/Sippy/HB_mzML/Run4_Ecoli268_R1a_10_13C_400ng.mzML"
+]
 mzml_files.sort() #does the order of files matter?
 
-database="C:/Sippy/Datasets/PXD024174 (Ecoli Spiking)/Database/target_decoy.fa"
+database="C:/Sippy/Datasets/PXD023693 (Ecoli C1-6)/Database/target_decoy.fa"
 
 #Also requires R to be set up and MSFragger to be installed
 
@@ -352,16 +370,21 @@ corrected_mzMLs=[HighResPrecursorMassCorrector(file,feature_files[ix]) for ix,fi
 
 #MSGF
 msgf_path="C:/MSGF/MSGFPlus_v20230112/MSGFPlus.jar"
-idXML_files=[MSGFPlusAdapter(file,database_path=database,msgf_path=msgf_path) for file in corrected_mzMLs]    
+idXML_files=[MSGFPlusAdapter(file,database_path=database,msgf_path=msgf_path,args=" -java_memory 20000 ") for file in corrected_mzMLs]    
 
-Annotated_spectra=[IDFilter(FalseDiscoveryRate(Proteininference(PeptideIndexer(file,database)))) for file in idXML_files]
+Annotated_spectra=[IDFilter(FalseDiscoveryRate(
+    Proteininference(
+        PeptideIndexer(file,database)),args=" -FDR:PSM 0.05 "),args=" -score:pep 0.01 ") for file in idXML_files]
+
+#filter
+
+
 
 #Loop3: Internal Calibration
 #input: loop 1 output, loop2 output, R
 corrected_mzMLs=[InternalCalibration(file,Annotated_spectra[ix]) for ix,file in enumerate( mzml_files)] 
 
 # Loop 4: Alignment and consensus features
-    
 #Align IDs, input: Loop 2 output
 aligned_idXMLs,trafo_files=MapAlignerIdentification(Annotated_spectra)
 #Align Features, input: features, trafoXML
@@ -378,3 +401,5 @@ pooled_features=FileConverter(consensus_file)
 #Loop 5. MetaproSIP
 #annotate aligned features with aligned idXML
 result=[MetaProSIP(file,database,pooled_features) for file in aligned_mzMLs]
+
+#%%
